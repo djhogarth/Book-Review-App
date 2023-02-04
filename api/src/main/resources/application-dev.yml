@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://test:5432/dev
+    username: admin
+    password: example
+
+  sql:
+    init:
+      mode: always
