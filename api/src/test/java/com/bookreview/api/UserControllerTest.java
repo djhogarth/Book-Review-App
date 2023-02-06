@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.bookreview.api.shared.GenericResponse;
 import com.bookreview.api.user.User;
 import com.bookreview.api.user.UserRepository;
 
@@ -33,9 +34,27 @@ public class UserControllerTest {
 	@Order(1)
 	public void postUser_whenUserIsValid_receiveOk() {
 		User appUser = createValidUser();
-
-		ResponseEntity<Object> response = testRestTemplate.postForEntity(API_USERS_PATH, appUser, Object.class);
+		
+		ResponseEntity<Object> response = testRestTemplate.postForEntity(API_USERS_PATH,appUser,Object.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+	}
+
+	
+	@Test
+	@Order(2)
+	public void postUser_whenUserIsValid_SavedUserToDatabase() {
+		User appUser = createValidUser();
+		testRestTemplate.postForEntity(API_USERS_PATH, appUser,Object.class);
+		assertThat(userRepository.count()).isEqualTo(1);
+	}
+
+	@Test
+	@Order(3)
+	public void postUser_whenUserIsValid_receiveSuccessMessage() {
+		User appUser = createValidUser();
+		
+		ResponseEntity<GenericResponse> response = testRestTemplate.postForEntity(API_USERS_PATH,appUser,GenericResponse.class);
+		assertThat(response.getBody().getMessage()).isNotNull();
 	}
 
 	private User createValidUser() {
@@ -50,14 +69,6 @@ public class UserControllerTest {
 		user.setCountry("Canada");
 		user.setCity("Mississauga");
 		return user;
-	}
-
-	@Test
-	@Order(2)
-	public void postUser_whenUserIsValid_SavedUserToDatabase() {
-		User appUser = createValidUser();
-		testRestTemplate.postForEntity(API_USERS_PATH, appUser,Object.class);
-		assertThat(userRepository.count()).isEqualTo(1);
 	}
 
 }
