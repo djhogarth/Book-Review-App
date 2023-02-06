@@ -1,9 +1,20 @@
+server:
+  port: 8080
+
 spring:
+  application:
+    name: book-review
   datasource:
-    url: jdbc:postgresql://test:5432/dev
+    url: jdbc:postgresql://localhost:5432/dev
     username: admin
     password: example
+    initialization-mode: always
 
-  sql:
-    init:
-      mode: always
+jpa:
+  show-sql: true
+  hibernate:
+    ddl-auto:
+  properties:
+    hibernate:
+      temp:
+        use_jdbc_metadata_defaults: false
