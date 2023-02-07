@@ -2,6 +2,8 @@ package com.bookreview.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.bookreview.api.shared.GenericResponse;
@@ -18,6 +22,7 @@ import com.bookreview.api.user.User;
 import com.bookreview.api.user.UserRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles("dev")
 
 public class UserControllerTest {
@@ -45,7 +50,7 @@ public class UserControllerTest {
 	public void postUser_whenUserIsValid_SavedUserToDatabase() {
 		User appUser = createValidUser();
 		testRestTemplate.postForEntity(API_USERS_PATH, appUser,Object.class);
-		assertThat(userRepository.count()).isEqualTo(1);
+		assertThat(userRepository.count()).isEqualTo( 1);
 	}
 
 	@Test
@@ -55,6 +60,21 @@ public class UserControllerTest {
 		
 		ResponseEntity<GenericResponse> response = testRestTemplate.postForEntity(API_USERS_PATH,appUser,GenericResponse.class);
 		assertThat(response.getBody().getMessage()).isNotNull();
+	}
+
+	@Order(4)
+	@Test
+	public void postUser_whenUserIsValid_passwordIsHashedInDatabase()
+	{
+		User appUser = createValidUser();
+		testRestTemplate.postForEntity(API_USERS_PATH, appUser,Object.class);
+
+		List<User> users = userRepository.findAll();
+		/* There will only be one user in database 
+		because database is cleared everytime application is run */ 
+		User userInDB = users.get(0);
+		// Confirm if the password has been hashed
+		assertThat(userInDB.getPassword()).isNotEqualTo(appUser.getPassword());
 	}
 
 	private User createValidUser() {
